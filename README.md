@@ -1,4 +1,4 @@
-# Home Assistant Simple Doorbell Notification & TTS
+# Home Assistant Light Toggle Automation for Appdaemon
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 <br><a href="https://www.buymeacoffee.com/Petro31" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-black.png" width="150px" height="35px" alt="Buy Me A Coffee" style="height: 35px !important;width: 150px !important;" ></a>
@@ -21,6 +21,18 @@ office_toggle:
   entity: switch.office_switch
   entities:
     - switch.office_outlet
+```
+
+#### Turn on light when TV turns on, only at night.
+```yaml
+tv_toggle:
+  module: toggle_light
+  class: ToggleLight
+  entity: remote.tv
+  turn_off: false
+  sundown: true
+  entities:
+    - light.living_room
 ```
 
 #### Advanced 
@@ -49,6 +61,9 @@ key | optional | type | default | description
 `class` | False | string | `ToggleLight` | The name of the Class.
 `entity` | False | string | | entity_id of light/switch/sensor etc.
 `entities`| False | list | | A list of entity_id's or entity objects.
+`turn_on` | False | bool | `true` | enables/disables the turn_on command when `entity` is toggled.
+`turn_off` | False | bool | `true` | enables/disables the turn_off command when `entity` is toggled.
+`sundown` | False | bool | `false` | only allows the toggle to occur when the sun is down.
 `log_level` | True | `'INFO'` &#124; `'DEBUG'` | `'INFO'` | Switches log level.
 
 #### Entity Object Configuration
