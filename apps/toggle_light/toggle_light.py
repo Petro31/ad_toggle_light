@@ -34,7 +34,7 @@ APP_SCHEMA = vol.Schema({
     vol.Required(CONF_CLASS): str,
     vol.Required(CONF_ENTITY): str,
     vol.Optional(CONF_ENTITIES): [ ENTITIES_SCHEMA ],
-    vol.Optional(CONF_SUNDOWN, default=True): bool,
+    vol.Optional(CONF_SUNDOWN, default=False): bool,
     vol.Optional(CONF_TURN_ON, default=True): bool,
     vol.Optional(CONF_TURN_OFF, default=True): bool,
     vol.Optional(CONF_LOG_LEVEL, default=LOG_DEBUG): vol.Any(LOG_INFO, LOG_DEBUG),
