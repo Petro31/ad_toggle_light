@@ -10,7 +10,10 @@ CONF_CLASS = 'class'
 CONF_ENTITIES = 'entities'
 CONF_ENTITY = 'entity'
 CONF_SERVICE_DATA = 'service_data'
+CONF_SUNDOWN = 'sundown'
 CONF_LOG_LEVEL = 'log_level'
+CONF_TURN_ON = 'turn_on'
+CONF_TURN_OFF = 'turn_off'
 
 LOG_ERROR = 'ERROR'
 LOG_DEBUG = 'DEBUG'
@@ -31,6 +34,9 @@ APP_SCHEMA = vol.Schema({
     vol.Required(CONF_CLASS): str,
     vol.Required(CONF_ENTITY): str,
     vol.Optional(CONF_ENTITIES): [ ENTITIES_SCHEMA ],
+    vol.Optional(CONF_SUNDOWN, default=True): bool,
+    vol.Optional(CONF_TURN_ON, default=True): bool,
+    vol.Optional(CONF_TURN_OFF, default=True): bool,
     vol.Optional(CONF_LOG_LEVEL, default=LOG_DEBUG): vol.Any(LOG_INFO, LOG_DEBUG),
 })
 
@@ -45,6 +51,11 @@ class ToggleLight(hass.Hass):
         self.entity = args.get(CONF_ENTITY)
 
         self._entities = [ AppEntity(e) for e in args.get(CONF_ENTITIES) ]
+        
+        self.use_sun = args.get(CONF_SUNDOWN)
+
+        self._enable_on = args.get(CONF_TURN_ON)
+        self._enable_off = args.get(CONF_TURN_OFF)
 
         self.handle = self.listen_state(self.toggle_entity, entity = self.entity)
         self.log(f"Created handle '{self.handle}'", level=self._level)
@@ -52,7 +63,9 @@ class ToggleLight(hass.Hass):
     def toggle_entity(self, entity, attribute, old, new, kwargs):
         self.log(f"'toggle_entity' callback states.{entity}.{attribute} {old} {new}", level=self._level)
         # leave the lists for future expansion
-        if new in [STATE_ON]:
+        sun = not self.use_sun or (self.use_sun and self.sun_down())
+
+        if new in [STATE_ON] and self._enable_on and sun:
             for ae in self._entities:
                 entity_id, attributes = ae.entity_id, ae.attributes
                 log_attributes = f' - {attributes}' if attributes else ''
@@ -62,7 +75,7 @@ class ToggleLight(hass.Hass):
                 else:
                     self.turn_on(entity_id)
 
-        elif new in [STATE_OFF]:
+        elif new in [STATE_OFF] and self._enable_off and sun:
             for ae in self._entities:
                 self.log(f"{STATE_OFF} - {ae.entity_id}", level = self._level)
                 if self.get_state(ae.entity_id) not in [STATE_OFF]:
